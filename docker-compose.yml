@@ -1,0 +1,81 @@
+# Development Docker Compose for Autemix Admin Platform
+# Usage: docker compose up -d
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: autemix_admin_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autemix-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autemix-network
+
+  # Backend development container
+  backend-dev:
+    image: ghcr.io/autemix/autemix-backend:dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/rails
+      - backend_bundle:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/autemix_admin_development
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_ENV=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - autemix-network
+
+  # Frontend development container
+  frontend-dev:
+    image: ghcr.io/autemix/autemix-frontend:dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend-dev:3001
+      - NODE_ENV=development
+    depends_on:
+      - backend-dev
+    networks:
+      - autemix-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_bundle:
+  frontend_node_modules:
+
+networks:
+  autemix-network:
+    driver: bridge
