@@ -54,6 +54,25 @@ services:
     networks:
       - autemix-network
 
+  # Sidekiq background job processor
+  sidekiq-dev:
+    image: ghcr.io/autemix/autemix-backend:dev
+    volumes:
+      - ./backend:/rails
+      - backend_bundle:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/autemix_admin_development
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_ENV=development
+    command: ["bundle", "exec", "sidekiq"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - autemix-network
+
   # Frontend development container
   frontend-dev:
     image: ghcr.io/autemix/autemix-frontend:dev

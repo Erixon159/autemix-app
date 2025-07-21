@@ -7,7 +7,8 @@ class HealthController < ApplicationController
       timestamp: Time.current.iso8601,
       services: {
         database: database_status,
-        redis: redis_status
+        redis: redis_status,
+        sidekiq: sidekiq_status
       }
     }
 
@@ -31,9 +32,30 @@ class HealthController < ApplicationController
   end
 
   def redis_status
-    # Add Redis connection check when Redis is configured
-    'not_configured'
-  rescue
+    $redis.ping == 'PONG' ? 'connected' : 'disconnected'
+  rescue => e
+    Rails.logger.error "Redis health check failed: #{e.message}"
     'disconnected'
+  end
+
+  def sidekiq_status
+    # Check if Sidekiq can connect to Redis and get stats
+    stats = Sidekiq::Stats.new
+    workers = Sidekiq::Workers.new
+    
+    {
+      status: 'running',
+      processed: stats.processed,
+      failed: stats.failed,
+      busy: stats.workers_size,
+      enqueued: stats.enqueued,
+      workers: workers.size
+    }
+  rescue => e
+    Rails.logger.error "Sidekiq health check failed: #{e.message}"
+    {
+      status: 'disconnected',
+      error: e.message
+    }
   end
 end

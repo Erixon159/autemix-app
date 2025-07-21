@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   
   # Custom health check endpoint for Docker containers
   get "health" => "health#show", as: :health_check
+  
+  # Sidekiq web interface (for development and admin monitoring)
+  if Rails.env.development? || Rails.env.staging?
+    mount Sidekiq::Web => '/sidekiq'
+  end
 
   # Defines the root path route ("/")
   # root "posts#index"
