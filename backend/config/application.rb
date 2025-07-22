@@ -33,5 +33,9 @@ module Backend
     config.session_store :cookie_store, key: '_autemix_admin_session'
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use config.session_store, config.session_options
+    
+    # Add tenant resolution middleware
+    require_relative '../lib/middleware/tenant_resolver'
+    config.middleware.use TenantResolver
   end
 end

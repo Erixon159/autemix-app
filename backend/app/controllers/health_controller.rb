@@ -1,4 +1,6 @@
 class HealthController < ApplicationController
+  skip_before_action :ensure_tenant_context
+  
   # Health check endpoint for Docker containers and load balancers
   def show
     health_status = {

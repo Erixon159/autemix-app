@@ -29,7 +29,7 @@
   - Create database migration for initial schema structure
   - _Requirements: 8.1, 8.2, 7.1_
 
-- [ ] 4. Implement multi-tenant foundation
+- [x] 4. Implement multi-tenant foundation
   - Create Tenant model with validations and subdomain support
   - Configure acts_as_tenant gem for automatic scoping
   - Implement tenant resolution middleware for subdomain/header detection

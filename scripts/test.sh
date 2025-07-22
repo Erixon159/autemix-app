@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Function to run backend tests
 test_backend() {
     echo -e "${BLUE}Running backend tests (RSpec)...${NC}"
-    docker compose exec backend-dev bundle exec rspec --format documentation "$@"
+    docker compose exec -e DATABASE_HOST=postgres backend-dev bundle exec rspec --format documentation "$@"
     echo -e "${GREEN}Backend tests completed!${NC}"
 }
 
