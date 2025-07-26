@@ -15,10 +15,9 @@ gem "bcrypt", "~> 3.1.7"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
+# Use the database-backed adapters for Rails.cache and Active Job
 gem "solid_cache"
 gem "solid_queue"
-gem "solid_cable"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -35,8 +34,7 @@ gem "thruster", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 
-# Authentication and authorization
-gem "devise", "~> 4.9"
+# Authentication will be handled with custom JWT implementation
 
 # Multi-tenancy support
 gem "acts_as_tenant", "~> 1.0"

@@ -1,6 +1,23 @@
 require_relative "boot"
 
-require "rails/all"
+# Load only the Rails components we need for an API-only application
+require "rails"
+require "active_model/railtie"
+require "active_job/railtie"
+require "active_record/railtie"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "rails/test_unit/railtie"
+
+# Skip these for API-only app:
+# require "active_storage/engine"
+# require "action_mailbox/engine"
+# require "action_text/engine"
+# require "action_view/railtie"
+# require "action_cable/engine"
+
+# Reactive all again:
+# require "rails/all"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -37,5 +54,9 @@ module Backend
     # Add tenant resolution middleware
     require_relative '../lib/middleware/tenant_resolver'
     config.middleware.use TenantResolver
+    
+    # Add API key authentication middleware
+    require_relative '../lib/middleware/api_key_authentication'
+    config.middleware.use ApiKeyAuthentication
   end
 end

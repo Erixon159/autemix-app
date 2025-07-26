@@ -12,12 +12,16 @@ The Vending Machine Admin Platform is a comprehensive BFF-based system designed 
 
 #### Acceptance Criteria
 
-1. WHEN an admin logs in THEN the system SHALL authenticate via cookie session and provide full platform access
-2. WHEN a technician logs in THEN the system SHALL authenticate via cookie session and provide restricted access to maintenance and refill operations only
-3. WHEN a vending machine makes an API request THEN the system SHALL authenticate via encrypted API key and allow write-only access to logs and inventory
-4. IF a user belongs to a tenant THEN the system SHALL scope all data access to that tenant's resources only
-5. WHEN authentication cookies are set THEN they SHALL be HttpOnly, Secure, and SameSite=Strict
-6. WHEN an API key is stored THEN it SHALL be encrypted in the database using secure encryption methods
+1. WHEN an admin logs in THEN the system SHALL authenticate via hybrid JWT + session approach providing full platform access
+2. WHEN a technician logs in THEN the system SHALL authenticate via hybrid JWT + session approach providing restricted access to maintenance and refill operations only
+3. WHEN the BFF communicates with the backend THEN it SHALL use JWT tokens in Authorization headers for stateless API authentication
+4. WHEN authentication cookies are set THEN they SHALL be HttpOnly, Secure, and SameSite=Strict for browser session persistence
+5. WHEN JWT tokens are issued THEN they SHALL have 24-hour expiration with JTI-based revocation capability
+6. WHEN a user logs out THEN the system SHALL revoke the JWT token and clear the session cookie
+7. WHEN a vending machine makes an API request THEN the system SHALL authenticate via encrypted API key and allow write-only access to logs and inventory
+8. IF a user belongs to a tenant THEN the system SHALL scope all data access to that tenant's resources only
+9. WHEN an API key is stored THEN it SHALL be encrypted in the database using Rails message verifier
+10. WHEN JWT tokens are revoked THEN the system SHALL use JTIMatcher strategy to invalidate tokens immediately
 
 ### Requirement 2: Vending Machine Management
 
@@ -100,8 +104,11 @@ The Vending Machine Admin Platform is a comprehensive BFF-based system designed 
 1. WHEN making API requests THEN the system SHALL follow RESTful conventions for all endpoints
 2. WHEN returning data THEN the API SHALL use consistent JSON serialization format
 3. WHEN errors occur THEN the API SHALL return appropriate HTTP status codes with descriptive messages
-4. WHEN handling authentication THEN the API SHALL support both cookie sessions and API key methods
-5. WHEN processing requests THEN the API SHALL validate input data and return validation errors clearly
+4. WHEN handling authentication THEN the API SHALL support JWT tokens, session cookies, and API key methods
+5. WHEN processing BFF requests THEN the API SHALL authenticate via JWT tokens in Authorization headers
+6. WHEN processing machine requests THEN the API SHALL authenticate via encrypted API keys
+7. WHEN JWT authentication fails THEN the API SHALL return 401 Unauthorized with token refresh guidance
+8. WHEN processing requests THEN the API SHALL validate input data and return validation errors clearly
 
 ### Requirement 9: Frontend Dashboard Interface
 

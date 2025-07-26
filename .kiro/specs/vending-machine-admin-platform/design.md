@@ -67,17 +67,20 @@ The system implements tenant isolation using the `acts_as_tenant` gem with autom
 
 ### Authentication Architecture
 
-**Cookie-Based Authentication (Admin/Technician)**:
-- Rails Devise with secure session cookies
-- HttpOnly, Secure, SameSite=Strict configuration
-- SSR-compatible authentication state
-- Automatic session refresh and timeout handling
+**Hybrid JWT + Session Authentication (Admin/Technician)**:
+- Rails Devise with devise-jwt extension for stateless API authentication
+- JWT tokens for API communication between Next.js BFF and Rails backend
+- Secure session cookies for browser-based authentication state persistence
+- JTIMatcher revocation strategy for secure token invalidation
+- HttpOnly, Secure, SameSite=Strict cookie configuration
+- 24-hour JWT token expiration with automatic refresh
+- RackSessionsFix concern to handle Rails 7 API session compatibility
 
 **API Key Authentication (Vending Machines)**:
-- Unique encrypted API keys per machine
-- Custom middleware for API key validation
+- Unique encrypted API keys per machine using Rails message verifier
+- Custom middleware for API key validation with cross-tenant support
 - Rate limiting and request logging
-- Key rotation capabilities
+- Key rotation capabilities with secure storage
 
 ## Components and Interfaces
 
@@ -85,17 +88,33 @@ The system implements tenant isolation using the `acts_as_tenant` gem with autom
 
 #### Authentication System
 ```ruby
-# Authentication middleware stack
+# Multi-method authentication middleware stack
 class ApiKeyAuthenticationMiddleware
-  # Validates machine API keys
-  # Sets current_machine context
-  # Logs authentication attempts
+  # Validates machine API keys with cross-tenant support
+  # Sets current_machine and current_tenant context
+  # Logs authentication attempts and failures
 end
 
 class TenantMiddleware
   # Resolves tenant from subdomain/header
   # Sets ActsAsTenant.current_tenant
-  # Handles tenant switching
+  # Handles tenant switching with audit logging
+end
+
+# JWT Authentication Controllers
+class Api::V1::Auth::SessionsController < Devise::SessionsController
+  include RackSessionsFix
+  respond_to :json
+  
+  # Handles login with JWT dispatch and session cookie
+  # Manages logout with JWT revocation
+  # Provides current user context endpoint
+end
+
+# Session compatibility fix for Rails 7 API mode
+module RackSessionsFix
+  # Creates fake session hash for Devise compatibility
+  # Handles Rails 7 ActionDispatch::Session issues
 end
 ```
 
@@ -139,7 +158,7 @@ end
 
 #### Authentication Flow
 ```typescript
-// Authentication middleware
+// BFF Authentication middleware
 export async function middleware(request: NextRequest) {
   const session = await getSession(request)
   if (!session && isProtectedRoute(request.nextUrl.pathname)) {
@@ -147,12 +166,41 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-// Session management
+// Hybrid session + JWT management
 class AuthService {
-  async login(credentials: LoginCredentials): Promise<User>
+  async login(credentials: LoginCredentials): Promise<{ user: User; token: string }>
   async logout(): Promise<void>
   async getCurrentUser(): Promise<User | null>
-  async refreshSession(): Promise<boolean>
+  async refreshToken(): Promise<string | null>
+  
+  // Internal methods for BFF communication
+  private async makeAuthenticatedRequest(endpoint: string, options?: RequestInit): Promise<Response>
+  private getStoredToken(): string | null
+  private setStoredToken(token: string): void
+}
+
+// API client for Rails backend communication
+class ApiClient {
+  constructor(private authService: AuthService) {}
+  
+  async get<T>(endpoint: string): Promise<T> {
+    const token = this.authService.getStoredToken()
+    return this.request(endpoint, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  }
+  
+  async post<T>(endpoint: string, data: any): Promise<T> {
+    const token = this.authService.getStoredToken()
+    return this.request(endpoint, {
+      method: 'POST',
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+  }
 }
 ```
 
@@ -200,21 +248,45 @@ end
 #### User Models
 ```ruby
 class Admin < ApplicationRecord
-  acts_as_tenant(:tenant)
-  devise :database_authenticatable, :registerable, :recoverable, :rememberable, :validatable
+  include Devise::JWT::RevocationStrategies::JTIMatcher
   
-  belongs_to :tenant
+  acts_as_tenant(:tenant)
+  devise :database_authenticatable, :registerable, :recoverable, 
+         :rememberable, :validatable, :trackable, :lockable,
+         :jwt_authenticatable, jwt_revocation_strategy: self
+  
+  belongs_to :tenant, required: true
   has_many :maintenance_logs, foreign_key: 'performed_by_id'
   
+  validates :first_name, presence: true, length: { maximum: 50 }
+  validates :last_name, presence: true, length: { maximum: 50 }
+  validates :jti, presence: true, uniqueness: true
+  
   enum role: { super_admin: 0, admin: 1 }
+  
+  def full_name
+    "#{first_name} #{last_name}"
+  end
 end
 
 class Technician < ApplicationRecord
-  acts_as_tenant(:tenant)
-  devise :database_authenticatable, :recoverable, :rememberable, :validatable
+  include Devise::JWT::RevocationStrategies::JTIMatcher
   
-  belongs_to :tenant
+  acts_as_tenant(:tenant)
+  devise :database_authenticatable, :recoverable, :rememberable, 
+         :validatable, :trackable, :lockable,
+         :jwt_authenticatable, jwt_revocation_strategy: self
+  
+  belongs_to :tenant, required: true
   has_many :maintenance_logs, foreign_key: 'performed_by_id'
+  
+  validates :first_name, presence: true, length: { maximum: 50 }
+  validates :last_name, presence: true, length: { maximum: 50 }
+  validates :jti, presence: true, uniqueness: true
+  
+  def full_name
+    "#{first_name} #{last_name}"
+  end
 end
 ```
 

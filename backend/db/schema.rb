@@ -10,9 +10,41 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_21_205123) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_26_093041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "admins", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.integer "failed_attempts", default: 0, null: false
+    t.datetime "locked_at"
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "password_digest", null: false
+    t.datetime "last_login_at"
+    t.string "last_login_ip"
+    t.index "lower((email)::text), tenant_id", name: "index_admins_on_lower_email_and_tenant_id", unique: true
+    t.index ["tenant_id"], name: "index_admins_on_tenant_id"
+  end
+
+  create_table "technicians", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.integer "failed_attempts", default: 0, null: false
+    t.datetime "locked_at"
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "password_digest", null: false
+    t.datetime "last_login_at"
+    t.string "last_login_ip"
+    t.index "lower((email)::text), tenant_id", name: "index_technicians_on_lower_email_and_tenant_id", unique: true
+    t.index ["tenant_id"], name: "index_technicians_on_tenant_id"
+  end
 
   create_table "tenants", force: :cascade do |t|
     t.string "name", limit: 100, null: false
@@ -24,4 +56,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_21_205123) do
     t.index ["subdomain", "active"], name: "index_tenants_on_subdomain_and_active"
     t.index ["subdomain"], name: "index_tenants_on_subdomain", unique: true
   end
+
+  create_table "vending_machines", force: :cascade do |t|
+    t.string "name"
+    t.string "location"
+    t.string "api_key_digest"
+    t.bigint "tenant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id"], name: "index_vending_machines_on_tenant_id"
+  end
+
+  add_foreign_key "admins", "tenants"
+  add_foreign_key "technicians", "tenants"
+  add_foreign_key "vending_machines", "tenants"
 end

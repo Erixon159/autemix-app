@@ -37,7 +37,7 @@
   - Write unit tests for tenant model and scoping behavior
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 5. Build authentication system foundation
+- [x] 5. Build authentication system foundation
   - Configure Devise for Admin and Technician models
   - Implement secure cookie session configuration (HttpOnly, Secure, SameSite)
   - Create custom API key authentication middleware for vending machines
@@ -45,7 +45,18 @@
   - Write authentication unit tests and integration tests
   - _Requirements: 1.1, 1.2, 1.5, 1.6_
 
-- [ ] 6. Create core data models
+- [ ] 6. Implement JWT authentication for BFF architecture
+  - Add devise-jwt gem and configure JWT secret key management
+  - Add JTI column to Admin and Technician models for token revocation
+  - Configure JWT dispatch and revocation for login/logout endpoints
+  - Create RackSessionsFix concern to handle Rails 7 API session issues
+  - Implement custom authentication controllers with JSON responses
+  - Create hybrid authentication supporting both JWT tokens and session cookies
+  - Update authentication middleware to handle multiple auth methods (JWT + API keys)
+  - Write comprehensive tests for JWT authentication flow
+  - _Requirements: 1.1, 1.2, 8.1, 8.4_
+
+- [ ] 7. Create core data models
   - Implement Admin model with Devise integration and tenant association
   - Implement Technician model with limited permissions and tenant scoping
   - Create VendingMachine model with UUID, encrypted API keys, and status tracking
@@ -53,7 +64,7 @@
   - Write comprehensive model unit tests with FactoryBot factories
   - _Requirements: 2.2, 2.5, 3.4, 4.4_
 
-- [ ] 7. Implement inventory management models
+- [ ] 8. Implement inventory management models
   - Create InventoryItem model linking perfumes to vending machines
   - Implement stock quantity tracking with low stock threshold logic
   - Create inventory scoping and validation rules
@@ -61,7 +72,7 @@
   - Write unit tests for inventory calculations and stock management
   - _Requirements: 3.1, 3.2, 3.4, 3.5_
 
-- [ ] 8. Build transaction logging system
+- [ ] 9. Build transaction logging system
   - Create SaleLog model for recording vending machine transactions
   - Implement automatic inventory decrement on sale recording
   - Create validation rules for sale data integrity
@@ -69,7 +80,7 @@
   - Write unit tests for sale logging and inventory updates
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 9. Implement maintenance tracking system
+- [ ] 10. Implement maintenance tracking system
   - Create MaintenanceLog model with polymorphic technician association
   - Implement ActiveStorage integration for maintenance photos
   - Create maintenance type enumeration and cost tracking
@@ -77,7 +88,7 @@
   - Write unit tests for maintenance logging and photo attachments
   - _Requirements: 5.1, 5.3, 5.4_
 
-- [ ] 10. Build alert and notification system
+- [ ] 11. Build alert and notification system
   - Create Alert model with priority levels and alert types
   - Implement AlertService for generating low stock alerts
   - Create MachineHealthCheckJob for monitoring offline machines
@@ -86,7 +97,7 @@
   - Write unit tests for alert generation and background job processing
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 5.2_
 
-- [ ] 11. Create RESTful API endpoints for authentication
+- [ ] 12. Create RESTful API endpoints for authentication
   - Implement sessions controller for login/logout functionality
   - Create /api/v1/sessions endpoints with proper error handling
   - Implement /api/v1/me endpoint for current user context
@@ -94,7 +105,7 @@
   - Write integration tests for authentication endpoints
   - _Requirements: 8.1, 8.3, 8.4, 1.1, 1.2_
 
-- [ ] 12. Implement vending machine API endpoints
+- [ ] 13. Implement vending machine API endpoints
   - Create VendingMachinesController with CRUD operations
   - Implement tenant-scoped machine queries and updates
   - Create machine heartbeat ping endpoint for status updates
@@ -102,7 +113,7 @@
   - Write integration tests for machine management endpoints
   - _Requirements: 8.1, 2.1, 2.3, 2.4, 8.5_
 
-- [ ] 13. Build inventory management API endpoints
+- [ ] 14. Build inventory management API endpoints
   - Create InventoryController for stock level management
   - Implement inventory update endpoints with validation
   - Create low stock alert triggering on inventory changes
@@ -110,7 +121,7 @@
   - Write integration tests for inventory management operations
   - _Requirements: 3.1, 3.2, 3.4, 3.5, 8.1_
 
-- [ ] 14. Implement sales transaction API endpoints
+- [ ] 15. Implement sales transaction API endpoints
   - Create SalesController for machine transaction logging
   - Implement API key authentication for machine-only access
   - Add automatic inventory updates on sale recording
@@ -118,7 +129,7 @@
   - Write integration tests for sales transaction processing
   - _Requirements: 4.1, 4.2, 4.3, 4.5, 1.3_
 
-- [ ] 15. Create maintenance and alert API endpoints
+- [ ] 16. Create maintenance and alert API endpoints
   - Implement MaintenanceLogsController for service record management
   - Create AlertsController for alert management and marking as read
   - Add photo upload handling for maintenance records
@@ -126,7 +137,7 @@
   - Write integration tests for maintenance and alert endpoints
   - _Requirements: 5.1, 5.3, 6.5, 8.1_
 
-- [ ] 15. Set up Next.js frontend foundation
+- [ ] 17. Set up Next.js frontend foundation
   - Configure Next.js 15 with App Router and TypeScript
   - Set up TailwindCSS and shadcn/ui component library
   - Create authentication middleware for route protection
@@ -134,7 +145,7 @@
   - Configure environment variables for API endpoints
   - _Requirements: 9.4, 8.2_
 
-- [ ] 16. Implement frontend authentication system
+- [ ] 18. Implement frontend authentication system
   - Create login page with form validation using React Hook Form
   - Implement AuthService for session management and API calls
   - Create authentication middleware for protected routes
@@ -143,7 +154,7 @@
   - Write unit tests for authentication components and services
   - _Requirements: 1.1, 1.2, 9.4_
 
-- [ ] 17. Build main dashboard interface
+- [ ] 19. Build main dashboard interface
   - Create dashboard layout with navigation and user context
   - Implement machine status overview with visual indicators
   - Create alert notification display with priority indicators
@@ -152,7 +163,7 @@
   - Write component tests for dashboard functionality
   - _Requirements: 9.1, 9.3, 9.5_
 
-- [ ] 18. Create machine management interface
+- [ ] 20. Create machine management interface
   - Build machine list view with status indicators and search
   - Create machine detail view with inventory and maintenance history
   - Implement machine creation and editing forms
@@ -161,7 +172,7 @@
   - Write component tests for machine management features
   - _Requirements: 2.1, 2.2, 2.4, 9.1, 9.2_
 
-- [ ] 19. Implement inventory management interface
+- [ ] 21. Implement inventory management interface
   - Create inventory grid component with stock level indicators
   - Build inventory update forms with validation
   - Implement low stock highlighting and alert integration
@@ -170,7 +181,7 @@
   - Write component tests for inventory management components
   - _Requirements: 3.1, 3.2, 3.4, 3.5, 9.2_
 
-- [ ] 20. Build maintenance tracking interface
+- [ ] 22. Build maintenance tracking interface
   - Create maintenance log entry forms with photo upload
   - Implement maintenance history display with filtering
   - Build maintenance scheduling and due date tracking
@@ -179,7 +190,7 @@
   - Write component tests for maintenance tracking features
   - _Requirements: 5.1, 5.3, 5.4, 9.2_
 
-- [ ] 21. Create alert and notification interface
+- [ ] 23. Create alert and notification interface
   - Build alert dashboard with priority-based sorting
   - Implement alert detail views with action buttons
   - Create alert filtering and search functionality
@@ -188,7 +199,7 @@
   - Write component tests for alert management interface
   - _Requirements: 6.1, 6.2, 6.3, 6.5, 9.3_
 
-- [ ] 22. Implement role-based access control
+- [ ] 24. Implement role-based access control
   - Create permission checking utilities for frontend components
   - Implement admin-only features and interface elements
   - Add technician-restricted views for maintenance operations
@@ -197,7 +208,7 @@
   - Write integration tests for role-based access scenarios
   - _Requirements: 1.1, 1.2, 7.4_
 
-- [ ] 23. Add comprehensive error handling
+- [ ] 25. Add comprehensive error handling
   - Implement global error boundary for React application
   - Create structured error display components
   - Add API error handling with user-friendly messages
@@ -206,7 +217,7 @@
   - Write tests for error handling scenarios
   - _Requirements: 8.3, 9.4_
 
-- [ ] 24. Create background job monitoring
+- [ ] 26. Create background job monitoring
   - Implement Sidekiq web interface for job monitoring
   - Create job failure handling and retry logic
   - Add job performance monitoring and alerting
@@ -215,7 +226,7 @@
   - Write tests for background job processing
   - _Requirements: 6.4, 10.5_
 
-- [ ] 25. Implement comprehensive testing suite
+- [ ] 27. Implement comprehensive testing suite
   - Create RSpec test suite with FactoryBot factories for all models
   - Write integration tests for all API endpoints with authentication
   - Implement frontend component tests using Jest and React Testing Library
@@ -224,7 +235,7 @@
   - Set up continuous integration pipeline for automated testing
   - _Requirements: 10.3, 10.4_
 
-- [ ] 26. Set up production deployment configuration
+- [ ] 28. Set up production deployment configuration
   - Create production Docker Compose configuration
   - Configure environment-specific settings and secrets
   - Set up database migration and seeding scripts
